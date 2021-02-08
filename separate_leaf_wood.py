@@ -4,7 +4,7 @@ import prepare_data_for_prediction
 
 
 
-def separate_leaf_wood(in_file, model_file, out_file):
+def separate_leaf_wood(in_file, clf, leaf_out_file, wood_out_file):
 
     data = np.loadtxt(in_file)
     data_with_features = prepare_data_for_prediction.get_all_features(data, in_file)
@@ -12,16 +12,30 @@ def separate_leaf_wood(in_file, model_file, out_file):
 
     data_feat[np.isnan(data_feat)] = 0
 
-    clf = pickle.load(open(model_file, 'rb'))
+    
     y_pred = clf.predict(data_feat)
-    np.savetxt(out_file, np.column_stack((data[:,0:3], y_pred)), fmt='%1.3f')
+    all_pts = np.column_stack((data[:,0:3], y_pred))
+    wood_pts = all_pts[all_pts[:, -1] == 1]
+    leaf_pts = all_pts[all_pts[:, -1] == 0]
+    np.savetxt(wood_out_file, wood_pts, fmt='%1.3f')
+    np.savetxt(leaf_out_file, leaf_pts, fmt='%1.3f')
+
     
 
 
 
-in_file = '' #input file name. Expects a ".txt" file with xyz coordinates of points separated by space. The file can have more than just xyz values for points (eg. reflectance). However, the first three attributes for every point should be the xyz coordinates. 
-out_file = '' #output file name to save the predictions.
 model_file = 'leaf_wood_RF_final_model.sav' #download the model from the following link: https://www.dropbox.com/s/dpe8hzxorufv7qt/leaf_vs_wood_clf_model.sav?dl=0
+in_folder = 'C:/Users/FieldLaptop/Dropbox/PhD/Results/BCI_2019/50ha_plot/Final_extracted_trees/Pointclouds/Failed_pt_cloud/' #path of the folder with all the input files
 
-separate_leaf_wood(in_file, model_file, out_file)
+clf = pickle.load(open(model_file, 'rb'))
+
+file_names = glob.glob(in_folder + '*.txt')
+
+
+for i in range(len(file_names)):
+    in_file = file_names[i]
+    leaf_out_file = in_file + '_leaf.txt'
+    wood_out_file = in_file + '_wood.txt'
+    separate_leaf_wood(in_file, clf, leaf_out_file, wood_out_file)
+
 
