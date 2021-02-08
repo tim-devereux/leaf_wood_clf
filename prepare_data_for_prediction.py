@@ -27,7 +27,7 @@ def generate_only_eigen_ratios_with_radius(nbr_pts, pt):
 
 def get_all_features(knn_arr, in_file):
     % Change the number of points based on the memory available
-    no_pts_in_loop = 200000 
+    no_pts_in_loop = 50000000 
     data_with_feat = []
     pts_count = knn_arr.shape
     print(pts_count[0])
